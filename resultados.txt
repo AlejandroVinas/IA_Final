@@ -1,0 +1,4 @@
+REPORTE OCR
+==============================
+test_impreso.png: ffFfJYlnqYFnrpfYY8pYYfNrr4f
+test_manuscrito.png: rOJpAJYrN8
