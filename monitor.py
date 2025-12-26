@@ -1,7 +1,7 @@
 import os
 import time
 import matplotlib.pyplot as plt
-
+import json
 
 LOG_FILE = 'training_auto.log'
 STATS_FILE = 'results/training_stats.json' # Opcional si decides guardar dicts
