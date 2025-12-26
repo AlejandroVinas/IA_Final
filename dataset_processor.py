@@ -1,79 +1,100 @@
 import numpy as np
 import cv2
 import os
-from pathlib import Path
-import json
-from datetime import datetime
 
 class HandwritingDatasetProcessor:
     def __init__(self, output_dir='processed_handwriting'):
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
-        self.stats = {'total_characters': 0, 'failed_images': []}
 
     def _leer_imagen_unicode(self, path):
         try:
             with open(str(path), "rb") as f:
                 chunk = np.frombuffer(f.read(), dtype=np.uint8)
-                return cv2.imdecode(chunk, cv2.IMREAD_UNCHANGED)
-        except: return None
+                img = cv2.imdecode(chunk, cv2.IMREAD_GRAYSCALE)
+                return img
+        except Exception as e:
+            return None
+
+    def _aumentar_imagen(self, img):
+        """Crea variaciones de la imagen original (Rotación y Ruido)"""
+        variaciones = []
+        h, w = img.shape
+        # Rotaciones leves (-7 y 7 grados)
+        for angulo in [-7, 7]:
+            M = cv2.getRotationMatrix2D((w//2, h//2), angulo, 1)
+            variaciones.append(cv2.warpAffine(img, M, (w, h), borderValue=0))
+        # Ruido suave
+        ruido = np.random.randint(0, 2, size=img.shape, dtype=np.uint8) * 255
+        variaciones.append(cv2.addWeighted(img, 0.9, ruido, 0.1, 0))
+        return variaciones
 
     def process_single_character_image(self, image_path):
         image = self._leer_imagen_unicode(image_path)
         if image is None: return None
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
-        binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+        
+        # Umbralado
+        _, binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
         contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
         if not contours: return None
-        x, y, w, h = cv2.boundingRect(max(contours, key=cv2.contourArea))
-        return self.normalize_character(binary[y:y+h, x:x+w])
+        
+        # Obtener el contorno más grande
+        c = max(contours, key=cv2.contourArea)
+        x, y, w, h = cv2.boundingRect(c)
+        
+        # --- PROTECCIÓN CONTRA DIMENSIONES CERO ---
+        if w <= 0 or h <= 0:
+            return None
+            
+        char_crop = binary[y:y+h, x:x+w]
+        canvas = np.zeros((28, 28), dtype=np.uint8)
+        
+        # Calcular escala asegurando que no haya división por cero
+        max_dim = max(w, h)
+        scale = 20.0 / max_dim
+        
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
+        
+        # Redimensionar con seguridad
+        try:
+            char_res = cv2.resize(char_crop, (new_w, new_h))
+            # Centrar en el canvas de 28x28
+            y_offset = (28 - new_h) // 2
+            x_offset = (28 - new_w) // 2
+            canvas[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = char_res
+            return canvas
+        except Exception:
+            return None
 
-    def normalize_character(self, char_img, target_size=(28, 28)):
-        h, w = char_img.shape
-        scale = 20.0 / max(w, h)
-        nw, nh = max(1, int(w * scale)), max(1, int(h * scale))
-        resized = cv2.resize(char_img, (nw, nh), interpolation=cv2.INTER_AREA)
-        res = np.zeros(target_size, dtype=np.uint8)
-        res[(28-nh)//2:(28-nh)//2+nh, (28-nw)//2:(28-nw)//2+nw] = resized
-        return res
-
-    def process_directory_structure(self, base_dir):
-        base_path = Path(base_dir)
+    def cargar_desde_carpetas(self, ruta_raiz='data'):
         all_images, all_labels = [], []
-        categories = {'Mayusculas': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'Minusculas': 'abcdefghijklmnopqrstuvwxyz', 'Numeros': '0123456789'}
+        categorias = ['Mayusculas', 'Minusculas', 'Numeros']
         
-        for cat_name, chars in categories.items():
-            cat_path = base_path / cat_name
-            for char in chars:
-                char_dir = cat_path / char
-                if not char_dir.exists(): continue
-                files = list(char_dir.glob('*.png')) + list(char_dir.glob('*.jpg'))
-                for img_path in files:
-                    norm = self.process_single_character_image(img_path)
-                    if norm is not None:
-                        all_images.append(norm); all_labels.append(char)
-        return np.array(all_images), np.array(all_labels)
+        if not os.path.exists(ruta_raiz):
+            print(f"❌ La carpeta {ruta_raiz} no existe.")
+            return np.array([]), np.array([])
 
-    def save_dataset(self, X, y):
-        # DICCIONARIO FIJO DE 62 CLASES (Evita desplazamientos)
-        caracteres_fijos = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-        char_to_idx = {char: i for i, char in enumerate(caracteres_fijos)}
-        idx_to_char = {i: char for char, i in char_to_idx.items()}
-        
-        X_filtrado, y_idx = [], []
-        for i in range(len(y)):
-            if y[i] in char_to_idx:
-                X_filtrado.append(X[i])
-                y_idx.append(char_to_idx[y[i]])
+        for cat in categorias:
+            ruta_cat = os.path.join(ruta_raiz, cat)
+            if not os.path.exists(ruta_cat): continue
+            
+            for char_folder in os.listdir(ruta_cat):
+                ruta_folder = os.path.join(ruta_cat, char_folder)
+                if not os.path.isdir(ruta_folder): continue
                 
-        path = os.path.join(self.output_dir, 'handwritten_dataset.npz')
-        np.savez_compressed(path, X=np.array(X_filtrado), y=np.array(y_idx))
-        with open(path.replace('.npz', '_mapping.json'), 'w', encoding='utf-8') as f:
-            json.dump({'char_to_idx': char_to_idx, 'idx_to_char': idx_to_char}, f)
-        return path
-
-def cargar_dataset(dataset_path='processed_handwriting/handwritten_dataset.npz'):
-    data = np.load(dataset_path, allow_pickle=True)
-    with open(dataset_path.replace('.npz', '_mapping.json'), 'r', encoding='utf-8') as f:
-        mapping = json.load(f)
-    return data['X'], data['y'], mapping['char_to_idx'], mapping['idx_to_char']
+                for img_name in os.listdir(ruta_folder):
+                    if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                        path = os.path.join(ruta_folder, img_name)
+                        norm = self.process_single_character_image(path)
+                        
+                        if norm is not None:
+                            all_images.append(norm)
+                            all_labels.append(char_folder)
+                            # Generar aumentadas
+                            for aux in self._aumentar_imagen(norm):
+                                all_images.append(aux)
+                                all_labels.append(char_folder)
+        
+        return np.array(all_images), np.array(all_labels)

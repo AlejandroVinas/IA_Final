@@ -3,92 +3,93 @@ import cv2
 import os
 import numpy as np
 import json
+import pickle
 from ocr_complete import OCRSystem, NeuralNetwork
+from dataset_processor import HandwritingDatasetProcessor
 
 def leer_imagen_unicode(ruta, flags=cv2.IMREAD_COLOR):
-    """Lee imágenes en rutas con tildes o caracteres especiales (UTF-8)."""
+    """Lee imágenes en rutas con tildes o caracteres especiales."""
     try:
-        # Usamos numpy para cargar el archivo binario y luego decodificarlo con OpenCV
         with open(ruta, "rb") as f:
             chunk = np.frombuffer(f.read(), dtype=np.uint8)
             return cv2.imdecode(chunk, flags)
     except Exception:
         return None
 
-def preparar_dataset_desde_data(ruta_raiz='data'):
-    X, y = [], []
-    mapeo_caracteres = [] 
-    categorias = ['Mayusculas', 'Minusculas', 'Numeros']
-
-    print(f"1. Analizando estructura de carpetas en '{ruta_raiz}'...")
-
-    for cat in categorias:
-        ruta_cat = os.path.join(ruta_raiz, cat)
-        if not os.path.exists(ruta_cat): continue
-        
-        items = sorted(os.listdir(ruta_cat))
-        for item in items:
-            ruta_item = os.path.join(ruta_cat, item)
-            if os.path.isdir(ruta_item):
-                if item not in mapeo_caracteres:
-                    mapeo_caracteres.append(item)
-
-    char_to_idx = {char: idx for idx, char in enumerate(mapeo_caracteres)}
-    idx_to_char = {idx: char for idx, char in enumerate(mapeo_caracteres)}
-
-    print(f"2. Cargando imágenes (corrigiendo rutas con caracteres especiales)...")
-    for cat in categorias:
-        ruta_cat = os.path.join(ruta_raiz, cat)
-        if not os.path.exists(ruta_cat): continue
-        
-        for caracter in os.listdir(ruta_cat):
-            ruta_caracter = os.path.join(ruta_cat, caracter)
-            if not os.path.isdir(ruta_caracter): continue
-                
-            label_idx = char_to_idx[caracter]
-            for archivo in os.listdir(ruta_caracter):
-                if archivo.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    img_path = os.path.join(ruta_caracter, archivo)
-                    
-                    # LLAMADA A LA FUNCIÓN CORREGIDA
-                    img = leer_imagen_unicode(img_path, cv2.IMREAD_GRAYSCALE)
-                    
-                    if img is not None:
-                        img_res = cv2.resize(img, (28, 28))
-                        X.append(img_res.flatten() / 255.0)
-                        label = np.zeros(len(mapeo_caracteres))
-                        label[label_idx] = 1
-                        y.append(label)
-
-    if not os.path.exists('processed_handwriting'): os.makedirs('processed_handwriting')
-    with open('processed_handwriting/handwritten_dataset_mapping.json', 'w', encoding='utf-8') as f:
-        json.dump({'idx_to_char': idx_to_char}, f)
-
-    return np.array(X), np.array(y), len(mapeo_caracteres)
-
 def cargar_y_entrenar():
-    X, y, num_clases = preparar_dataset_desde_data()
+    """Carga los datos con aumento y entrena la red neuronal."""
+    print("\n" + "="*50)
+    print("      INICIANDO PROCESO DE ENTRENAMIENTO")
+    print("="*50)
+
+    # 1. Cargar y aumentar datos
+    dp = HandwritingDatasetProcessor()
+    print("[1] Cargando imágenes y generando variaciones (Data Augmentation)...")
+    X, y_labels = dp.cargar_desde_carpetas('data')
+    
     if len(X) == 0:
-        print("Error: No se cargaron imágenes. Revisa la carpeta 'data'.")
+        print("❌ ERROR: No se encontraron imágenes en la carpeta 'data'.")
         return False
 
-    print(f"3. Entrenando red con {len(X)} imágenes cargadas correctamente...")
-    nn = NeuralNetwork(layers=[784, 128, num_clases], learning_rate=0.01)
+    # 2. Crear mapeo de clases (Mayúsculas, Minúsculas y Números)
+    clases_unicas = sorted(list(set(y_labels)))
+    char_to_idx = {char: i for i, char in enumerate(clases_unicas)}
+    idx_to_char = {i: char for char, i in char_to_idx.items()}
+    num_clases = len(clases_unicas)
     
-    for epoch in range(51):
-        acts = nn.forward(X)
-        nn.backward(acts, y)
-        if epoch % 10 == 0:
-            loss = -np.mean(y * np.log(acts[-1] + 1e-8))
-            print(f"   Época {epoch}/50 - Error: {loss:.4f}")
+    print(f"[2] Clases detectadas: {num_clases}")
+    print(f"[+] Total de muestras (originales + aumentadas): {len(X)}")
 
-    if not os.path.exists('models'): os.makedirs('models')
-    nn.save_model('models/ocr_model.pkl')
-    print("4. Modelo entrenado con éxito.")
+    # 3. Preparar datos para la red
+    X_flat = X.reshape(len(X), -1) / 255.0  # Normalizar 0-1
+    y_oh = np.zeros((len(y_labels), num_clases))
+    for i, label in enumerate(y_labels):
+        y_oh[i, char_to_idx[label]] = 1
+
+    # 4. Configurar Red Neuronal (Arquitectura Reforzada)
+    # Capas: Entrada(784) -> Oculta1(256) -> Oculta2(128) -> Salida(num_clases)
+    # Learning rate bajado a 0.01 para mayor estabilidad
+    nn = NeuralNetwork([784, 256, 128, num_clases], learning_rate=0.01)
+
+    # 5. Bucle de entrenamiento
+    print(f"[3] Entrenando durante 150 épocas...")
+    for epoch in range(151):
+        # Mezclar datos en cada época (shuffling)
+        idx = np.random.permutation(len(X_flat))
+        X_shuffled = X_flat[idx]
+        y_shuffled = y_oh[idx]
+        
+        # Mini-batch training para mejor convergencia
+        batch_size = 32
+        for i in range(0, len(X_flat), batch_size):
+            batch_x = X_shuffled[i:i+batch_size]
+            batch_y = y_shuffled[i:i+batch_size]
+            acts = nn.forward(batch_x)
+            nn.backward(acts, batch_y)
+            
+        if epoch % 10 == 0:
+            predicciones = nn.forward(X_flat)[-1]
+            error = np.mean(np.square(y_oh - predicciones))
+            # Calcular precisión simple
+            acc = np.mean(np.argmax(predicciones, axis=1) == np.argmax(y_oh, axis=1)) * 100
+            print(f"    Época {epoch:3}/150 | Error: {error:.6f} | Precisión: {acc:.2f}%")
+
+    # 6. Guardar el modelo y el mapeo
+    os.makedirs('models', exist_ok=True)
+    with open('models/ocr_model.pkl', 'wb') as f:
+        pickle.dump(nn, f)
+    
+    with open('models/ocr_model_mapping.json', 'w', encoding='utf-8') as f:
+        json.dump({'idx_to_char': idx_to_char}, f, indent=4)
+        
+    print("\n✅ Modelo entrenado y guardado en 'models/'.")
     return True
 
-def procesar_automatico():
-    if not cargar_y_entrenar(): return
+def procesar_imagenes():
+    """Usa el modelo guardado para leer imágenes en la carpeta de entrada."""
+    if not os.path.exists('models/ocr_model.pkl'):
+        print("❌ ERROR: No existe un modelo entrenado. Ejecuta 'python main.py entrenar' primero.")
+        return
 
     ocr = OCRSystem()
     ruta_input = 'imagenes_a_procesar'
@@ -96,30 +97,40 @@ def procesar_automatico():
 
     if not os.path.exists(ruta_input):
         os.makedirs(ruta_input)
-        print(f"\n[!] Carpeta '{ruta_input}' creada. Pon tus imágenes allí.")
+        print(f"[!] Carpeta '{ruta_input}' creada. Añade imágenes allí.")
         return
 
-    print(f"\n5. Procesando imágenes de la carpeta '{ruta_input}'...")
     archivos = [f for f in os.listdir(ruta_input) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    
     if not archivos:
-        print("   -> No hay imágenes nuevas en 'imagenes_a_procesar'.")
+        print("[-] No hay imágenes para procesar en 'imagenes_a_procesar'.")
         return
 
+    print(f"[*] Procesando {len(archivos)} imágenes...")
     with open(archivo_txt, 'w', encoding='utf-8') as f:
-        f.write("REPORTE OCR\n" + "="*30 + "\n")
+        f.write("REPORTE OCR - RESULTADOS\n" + "="*30 + "\n")
         for nombre in archivos:
             img_path = os.path.join(ruta_input, nombre)
-            img = leer_imagen_unicode(img_path) # Usar versión unicode aquí también
+            img = leer_imagen_unicode(img_path)
             if img is not None:
                 resultado = ocr.process_image(img)
-                f.write(f"{nombre}: {resultado}\n")
+                f.write(f"Archivo: {nombre}\nResultado: {resultado}\n" + "-"*30 + "\n")
                 print(f"   [OK] {nombre} -> {resultado}")
 
-    print(f"\n[FIN] Resultados guardados en '{archivo_txt}'.")
+    print(f"\n✅ Proceso terminado. Resultados guardados en '{archivo_txt}'.")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "procesar":
-        procesar_automatico()
+    if len(sys.argv) < 2:
+        print("\nUso: python main.py [entrenar | procesar | todo]")
+        sys.exit(1)
+
+    comando = sys.argv[1].lower()
+
+    if comando == "entrenar":
+        cargar_y_entrenar()
+    elif comando == "procesar":
+        procesar_imagenes()
+    elif comando == "todo":
+        if cargar_y_entrenar():
+            procesar_imagenes()
     else:
-        print("Uso: python main.py procesar")
+        print(f"❌ Comando '{comando}' no reconocido.")

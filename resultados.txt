@@ -1,4 +1,4 @@
 REPORTE OCR
 ==============================
-test_impreso.png: ffFfJYlnqYFnrpfYY8pYYfNrr4f
-test_manuscrito.png: rOJpAJYrN8
+test_impreso.png: hNsNHZhsNNHNhZshZHhhZZHHZdZ
+test_manuscrito.png: NhhhHsZhhh
