@@ -1,4 +1,8 @@
-REPORTE OCR
+REPORTE OCR - RESULTADOS
 ==============================
-test_impreso.png: hNsNHZhsNNHNhZshZHhhZZHHZdZ
-test_manuscrito.png: NhhhHsZhhh
+Archivo: test_impreso.png
+Resultado: EHs2ot3Qoi5eusuuÑnDoopwebo
+------------------------------
+Archivo: test_manuscrito.png
+Resultado: ñF67wB9ñ0T
+------------------------------
