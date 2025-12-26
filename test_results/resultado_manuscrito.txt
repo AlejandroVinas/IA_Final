@@ -1,0 +1,10 @@
+TEXTO ORIGINAL:
+Hola Mundo
+Prueba manuscrita
+67890
+
+TEXTO RECONOCIDO:
+p
+
+CONFIANZA: 76.23%
+ACCURACY: 0.00%

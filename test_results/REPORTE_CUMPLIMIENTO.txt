@@ -1,0 +1,17 @@
+============================================================
+REPORTE DE CUMPLIMIENTO - FUNCIONALIDADES OBLIGATORIAS
+============================================================
+
+Fecha: 2025-12-26 13:05:32
+
+Tests ejecutados: 4
+Tests pasados: 2
+Tests fallidos: 2
+
+FUNCIONALIDADES OBLIGATORIAS:
+1. Texto Impreso: NO CUMPLIDA
+2. Texto Manuscrito: NO CUMPLIDA
+
+
+============================================================
+CONCLUSIÓN: FUNCIONALIDADES INCOMPLETAS
