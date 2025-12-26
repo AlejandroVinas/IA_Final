@@ -4,7 +4,7 @@ Esto es una prueba
 12345
 
 TEXTO RECONOCIDO:
-Bi12t3yoi5NNuuÑMxPvebn
+mm1mamuuuNmwpñebQ
 
-CONFIANZA: 88.56%
+CONFIANZA: 80.84%
 ACCURACY: 0.00%

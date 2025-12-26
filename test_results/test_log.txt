@@ -1,47 +1,47 @@
-[18:18:47] ℹ️ Test 1: Cargando modelo...
-[18:18:47] ✅ Modelo cargado correctamente
-[18:18:47] ℹ️ 
+[18:27:45] ℹ️ Test 1: Cargando modelo...
+[18:27:45] ✅ Modelo cargado correctamente
+[18:27:45] ℹ️ 
 Test 2: Reconocimiento de Texto Impreso
-[18:18:47] ℹ️ Imagen generada: test_results\test_impreso.png
-[18:18:47] ℹ️ Texto esperado: HOLA MUNDO Esto es una prueba 12345
-[18:18:47] ℹ️ Texto reconocido: Bi12t3yoi5NNuuÑMxPvebn
-[18:18:47] ℹ️ Confianza: 88.56%
-[18:18:47] ℹ️ Accuracy: 0.00%
-[18:18:47] ❌ ✗ FUNCIONALIDAD 1: Accuracy insuficiente (0.00%)
-[18:18:47] ℹ️ 
+[18:27:45] ℹ️ Imagen generada: test_results\test_impreso.png
+[18:27:45] ℹ️ Texto esperado: HOLA MUNDO Esto es una prueba 12345
+[18:27:45] ℹ️ Texto reconocido: mm1mamuuuNmwpñebQ
+[18:27:45] ℹ️ Confianza: 80.84%
+[18:27:45] ℹ️ Accuracy: 0.00%
+[18:27:45] ❌ ✗ FUNCIONALIDAD 1: Accuracy insuficiente (0.00%)
+[18:27:45] ℹ️ 
 Test 3: Reconocimiento de Texto Manuscrito
-[18:18:47] ℹ️ Imagen generada: test_results\test_manuscrito.png
-[18:18:47] ℹ️ Texto esperado: Hola Mundo Prueba manuscrita 67890
-[18:18:47] ℹ️ Texto reconocido: uF67ds9uod
-[18:18:48] ℹ️ Confianza: 85.70%
-[18:18:48] ℹ️ Accuracy: 3.33%
-[18:18:48] ❌ ✗ FUNCIONALIDAD 2: Accuracy insuficiente (3.33%)
-[18:18:48] ℹ️ 
+[18:27:45] ℹ️ Imagen generada: test_results\test_manuscrito.png
+[18:27:45] ℹ️ Texto esperado: Hola Mundo Prueba manuscrita 67890
+[18:27:45] ℹ️ Texto reconocido: 44s7Bg40H
+[18:27:45] ℹ️ Confianza: 66.45%
+[18:27:45] ℹ️ Accuracy: 0.00%
+[18:27:45] ❌ ✗ FUNCIONALIDAD 2: Accuracy insuficiente (0.00%)
+[18:27:45] ℹ️ 
 Test 4: Generación de archivo .txt
-[18:18:48] ✅ ✓ Archivo generado: resultado_impreso.txt
-[18:18:48] ✅ ✓ Archivo generado: resultado_manuscrito.txt
-[18:18:48] ℹ️ 
+[18:27:45] ✅ ✓ Archivo generado: resultado_impreso.txt
+[18:27:45] ✅ ✓ Archivo generado: resultado_manuscrito.txt
+[18:27:45] ℹ️ 
 ============================================================
-[18:18:48] ℹ️ REPORTE FINAL DE CUMPLIMIENTO
-[18:18:48] ℹ️ ============================================================
-[18:18:48] ℹ️ 
+[18:27:45] ℹ️ REPORTE FINAL DE CUMPLIMIENTO
+[18:27:45] ℹ️ ============================================================
+[18:27:45] ℹ️ 
 Tests ejecutados: 4
-[18:18:48] ⚠️ Tests pasados: 2 (50.0%)
-[18:18:48] ❌ Tests fallidos: 2
-[18:18:48] ℹ️ 
+[18:27:45] ⚠️ Tests pasados: 2 (50.0%)
+[18:27:45] ❌ Tests fallidos: 2
+[18:27:45] ℹ️ 
 ============================================================
-[18:18:48] ℹ️ FUNCIONALIDADES OBLIGATORIAS:
-[18:18:48] ℹ️ ============================================================
-[18:18:48] ❌ 
+[18:27:45] ℹ️ FUNCIONALIDADES OBLIGATORIAS:
+[18:27:45] ℹ️ ============================================================
+[18:27:45] ❌ 
 1. Texto Impreso (digital): ❌ NO CUMPLIDA
-[18:18:48] ❌ 2. Texto Manuscrito (manual): ❌ NO CUMPLIDA
-[18:18:48] ℹ️ 
+[18:27:45] ❌ 2. Texto Manuscrito (manual): ❌ NO CUMPLIDA
+[18:27:45] ℹ️ 
 ============================================================
-[18:18:48] ℹ️ CONCLUSIÓN:
-[18:18:48] ℹ️ ============================================================
-[18:18:48] ❌ 
+[18:27:45] ℹ️ CONCLUSIÓN:
+[18:27:45] ℹ️ ============================================================
+[18:27:45] ❌ 
 ❌ FUNCIONALIDADES OBLIGATORIAS INCOMPLETAS
-[18:18:48] ⚠️ 
+[18:27:45] ⚠️ 
 El sistema requiere ajustes antes de entrega.
-[18:18:48] ✅ 
+[18:27:45] ✅ 
 ✓ Reporte guardado en: test_results\REPORTE_CUMPLIMIENTO.txt
