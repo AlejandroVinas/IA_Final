@@ -1,0 +1,8 @@
+REPORTE OCR FINAL
+==============================
+IMAGEN: test_impreso.png
+TEXTO: MM1MIWXWTMTMMMM
+--------------------
+IMAGEN: test_manuscrito.png
+TEXTO: MMM7VBM0M
+--------------------

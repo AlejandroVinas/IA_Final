@@ -1,0 +1,10 @@
+TEXTO ORIGINAL:
+HOLA MUNDO
+Esto es una prueba
+12345
+
+TEXTO RECONOCIDO:
+mm1mamuuuNmwpñebQ
+
+CONFIANZA: 80.84%
+ACCURACY: 0.00%
