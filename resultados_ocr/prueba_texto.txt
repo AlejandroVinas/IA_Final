@@ -1,0 +1,3 @@
+Archivo: prueba.png
+Texto reconocido: HOLA1
+Confianza: 99.4%
