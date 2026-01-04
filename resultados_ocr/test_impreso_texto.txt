@@ -1,0 +1,3 @@
+Archivo: test_impreso.png
+Texto reconocido: HDQ123
+Confianza: 89.7%

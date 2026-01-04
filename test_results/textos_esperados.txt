@@ -1,0 +1,5 @@
+# Textos esperados para las pruebas
+# Formato: nombre_test=TEXTO_ESPERADO
+
+test_impreso=HOLA123
+test_manuscrito=HOLA123

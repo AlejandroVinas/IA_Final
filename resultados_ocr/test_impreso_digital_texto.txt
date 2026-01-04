@@ -1,0 +1,3 @@
+Archivo: test_impreso_digital.png
+Texto reconocido: HDLA123
+Confianza: 96.4%

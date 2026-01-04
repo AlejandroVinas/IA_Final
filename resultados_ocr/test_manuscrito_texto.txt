@@ -1,0 +1,3 @@
+Archivo: test_manuscrito.png
+Texto reconocido: HvqAv
+Confianza: 77.3%

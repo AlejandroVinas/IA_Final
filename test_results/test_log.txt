@@ -1,47 +1,54 @@
-[18:27:45] ℹ️ Test 1: Cargando modelo...
-[18:27:45] ✅ Modelo cargado correctamente
-[18:27:45] ℹ️ 
-Test 2: Reconocimiento de Texto Impreso
-[18:27:45] ℹ️ Imagen generada: test_results\test_impreso.png
-[18:27:45] ℹ️ Texto esperado: HOLA MUNDO Esto es una prueba 12345
-[18:27:45] ℹ️ Texto reconocido: mm1mamuuuNmwpñebQ
-[18:27:45] ℹ️ Confianza: 80.84%
-[18:27:45] ℹ️ Accuracy: 0.00%
-[18:27:45] ❌ ✗ FUNCIONALIDAD 1: Accuracy insuficiente (0.00%)
-[18:27:45] ℹ️ 
+[14:22:11] ℹ️ Test 1: Cargando modelo...
+[14:22:11] ✅ Modelo cargado: 64 clases detectadas
+[14:22:11] ℹ️ 
+Test 2: Reconocimiento de Texto Impreso (Digital)
+[14:22:11] ✅ ✓ Usando imagen existente: test_results\test_impreso_digital.png
+[14:22:11] ℹ️ Texto esperado (desde config): 'HOLA123'
+[14:22:11] ℹ️ 💡 Para cambiar, edita: test_results\textos_esperados.txt
+[14:22:11] ℹ️ Texto reconocido: 'H O L A 1 2 3'
+[14:22:11] ℹ️ Confianza: 97.90%
+[14:22:11] ℹ️ Accuracy: 100.00%
+[14:22:11] ✅ ✓ FUNCIONALIDAD 1 (Texto Impreso): CUMPLIDA
+[14:22:11] ℹ️ 
 Test 3: Reconocimiento de Texto Manuscrito
-[18:27:45] ℹ️ Imagen generada: test_results\test_manuscrito.png
-[18:27:45] ℹ️ Texto esperado: Hola Mundo Prueba manuscrita 67890
-[18:27:45] ℹ️ Texto reconocido: 44s7Bg40H
-[18:27:45] ℹ️ Confianza: 66.45%
-[18:27:45] ℹ️ Accuracy: 0.00%
-[18:27:45] ❌ ✗ FUNCIONALIDAD 2: Accuracy insuficiente (0.00%)
-[18:27:45] ℹ️ 
-Test 4: Generación de archivo .txt
-[18:27:45] ✅ ✓ Archivo generado: resultado_impreso.txt
-[18:27:45] ✅ ✓ Archivo generado: resultado_manuscrito.txt
-[18:27:45] ℹ️ 
-============================================================
-[18:27:45] ℹ️ REPORTE FINAL DE CUMPLIMIENTO
-[18:27:45] ℹ️ ============================================================
-[18:27:45] ℹ️ 
-Tests ejecutados: 4
-[18:27:45] ⚠️ Tests pasados: 2 (50.0%)
-[18:27:45] ❌ Tests fallidos: 2
-[18:27:45] ℹ️ 
-============================================================
-[18:27:45] ℹ️ FUNCIONALIDADES OBLIGATORIAS:
-[18:27:45] ℹ️ ============================================================
-[18:27:45] ❌ 
-1. Texto Impreso (digital): ❌ NO CUMPLIDA
-[18:27:45] ❌ 2. Texto Manuscrito (manual): ❌ NO CUMPLIDA
-[18:27:45] ℹ️ 
-============================================================
-[18:27:45] ℹ️ CONCLUSIÓN:
-[18:27:45] ℹ️ ============================================================
-[18:27:45] ❌ 
-❌ FUNCIONALIDADES OBLIGATORIAS INCOMPLETAS
-[18:27:45] ⚠️ 
-El sistema requiere ajustes antes de entrega.
-[18:27:45] ✅ 
-✓ Reporte guardado en: test_results\REPORTE_CUMPLIMIENTO.txt
+[14:22:11] ✅ ✓ Usando imagen MANUSCRITA REAL: test_results\test_manuscrito.png
+[14:22:11] ℹ️ Texto esperado (desde config): 'HOLA123'
+[14:22:11] ℹ️ 💡 Para cambiar, edita: test_results\textos_esperados.txt
+[14:22:11] ℹ️ Texto reconocido: 'BÑ9I7'
+[14:22:11] ℹ️ Confianza: 47.39%
+[14:22:11] ℹ️ Accuracy: 0.00%
+[14:22:11] ⚠️ ✗ FUNCIONALIDAD 2: Accuracy 0.00% < 70%
+[14:22:11] ℹ️ 
+======================================================================
+[14:22:11] ℹ️ REPORTE FINAL DE CUMPLIMIENTO
+[14:22:11] ℹ️ ======================================================================
+[14:22:11] ℹ️ 
+Tests ejecutados: 3
+[14:22:11] ✅ Tests pasados: 2 (66.7%)
+[14:22:11] ❌ Tests fallidos: 1
+[14:22:11] ℹ️ 
+======================================================================
+[14:22:11] ℹ️ FUNCIONALIDADES OBLIGATORIAS:
+[14:22:11] ℹ️ ======================================================================
+[14:22:11] ✅ 
+1. Texto Impreso (≥90%): ✅ CUMPLIDA
+[14:22:11] ❌ 2. Texto Manuscrito (≥70%): ❌ NO CUMPLIDA
+[14:22:11] ℹ️ 
+======================================================================
+[14:22:11] ℹ️ DETALLES:
+[14:22:11] ℹ️ ======================================================================
+[14:22:11] ℹ️ 
+Reconocimiento Texto Impreso:
+[14:22:11] ✅   Estado: PASS
+[14:22:11] ℹ️   Accuracy: 100.00%
+[14:22:11] ℹ️   Confianza: 97.90%
+[14:22:11] ℹ️ 
+Reconocimiento Texto Manuscrito:
+[14:22:11] ❌   Estado: FAIL
+[14:22:11] ℹ️   Accuracy: 0.00%
+[14:22:11] ℹ️   Confianza: 47.39%
+[14:22:11] ℹ️ 
+======================================================================
+[14:22:11] ⚠️ ⚠️  FUNCIONALIDADES PARCIALMENTE CUMPLIDAS
+[14:22:11] ℹ️ Intenta re-entrenar: python main.py entrenar
+[14:22:11] ℹ️ ======================================================================
