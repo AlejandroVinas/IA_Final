@@ -1,0 +1,3 @@
+Archivo: test_manuscrito2.png
+Texto reconocido: himñvdr7u7dÑivvgvÑwjdñd3d
+Confianza: 82.8%
