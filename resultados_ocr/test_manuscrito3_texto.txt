@@ -1,0 +1,3 @@
+Archivo: test_manuscrito3.png
+Texto reconocido: ESrÑÑNwDr
+Confianza: 76.9%

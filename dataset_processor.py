@@ -31,13 +31,15 @@ class HandwritingDatasetProcessor:
 
     def process_single_character_image(self, image_path):
         image = self._leer_imagen_unicode(image_path)
-        if image is None: return None
+        if image is None: 
+            return None
         
         # Umbralado
         _, binary = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
         contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
-        if not contours: return None
+        if not contours: 
+            return None
         
         # Obtener el contorno más grande
         c = max(contours, key=cv2.contourArea)
@@ -69,32 +71,107 @@ class HandwritingDatasetProcessor:
             return None
 
     def cargar_desde_carpetas(self, ruta_raiz='data'):
+        """
+        Carga datos de múltiples fuentes:
+        1. Carpetas originales (Mayusculas, Minusculas, Numeros)
+        2. Manuscritos propios (data_manuscrito_propio)
+        """
         all_images, all_labels = [], []
+        
+        print("\n" + "="*70)
+        print("📂 CARGANDO DATASETS")
+        print("="*70)
+        
+        # 1. CARGAR DATOS ORIGINALES
         categorias = ['Mayusculas', 'Minusculas', 'Numeros']
         
-        if not os.path.exists(ruta_raiz):
-            print(f"❌ La carpeta {ruta_raiz} no existe.")
-            return np.array([]), np.array([])
-
-        for cat in categorias:
-            ruta_cat = os.path.join(ruta_raiz, cat)
-            if not os.path.exists(ruta_cat): continue
+        if os.path.exists(ruta_raiz):
+            print(f"\n[*] Cargando datos originales de: {ruta_raiz}/")
             
-            for char_folder in os.listdir(ruta_cat):
-                ruta_folder = os.path.join(ruta_cat, char_folder)
-                if not os.path.isdir(ruta_folder): continue
+            for cat in categorias:
+                ruta_cat = os.path.join(ruta_raiz, cat)
+                if not os.path.exists(ruta_cat): 
+                    continue
                 
-                for img_name in os.listdir(ruta_folder):
-                    if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
-                        path = os.path.join(ruta_folder, img_name)
-                        norm = self.process_single_character_image(path)
+                cat_count = 0
+                for char_folder in os.listdir(ruta_cat):
+                    ruta_folder = os.path.join(ruta_cat, char_folder)
+                    if not os.path.isdir(ruta_folder): 
+                        continue
+                    
+                    char_count = 0
+                    for img_name in os.listdir(ruta_folder):
+                        if img_name.lower().endswith(('.png', '.jpg', '.jpeg')):
+                            path = os.path.join(ruta_folder, img_name)
+                            norm = self.process_single_character_image(path)
+                            
+                            if norm is not None:
+                                all_images.append(norm)
+                                all_labels.append(char_folder)
+                                char_count += 1
+                                
+                                # Generar aumentadas
+                                for aux in self._aumentar_imagen(norm):
+                                    all_images.append(aux)
+                                    all_labels.append(char_folder)
+                    
+                    if char_count > 0:
+                        cat_count += char_count
+                
+                if cat_count > 0:
+                    print(f"    ✓ {cat}: {cat_count} caracteres base")
+        
+        original_count = len(all_images)
+        print(f"\n[📊] Total datos originales (con aumentación): {original_count}")
+        
+        # 2. CARGAR MANUSCRITOS PROPIOS
+        manuscrito_dir = 'data_manuscrito_propio'
+        if os.path.exists(manuscrito_dir):
+            print(f"\n[*] Cargando manuscritos propios de: {manuscrito_dir}/")
+            manuscritos_base = 0
+            manuscritos_total = 0
+            
+            for char_folder in sorted(os.listdir(manuscrito_dir)):
+                char_path = os.path.join(manuscrito_dir, char_folder)
+                if not os.path.isdir(char_path):
+                    continue
+                
+                char_count = 0
+                for img_file in os.listdir(char_path):
+                    if img_file.endswith('.png'):
+                        img_path = os.path.join(char_path, img_file)
+                        # Estos ya están en 28x28, solo cargarlos
+                        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
                         
-                        if norm is not None:
-                            all_images.append(norm)
+                        if img is not None and img.shape == (28, 28):
+                            all_images.append(img)
                             all_labels.append(char_folder)
-                            # Generar aumentadas
-                            for aux in self._aumentar_imagen(norm):
+                            char_count += 1
+                            manuscritos_base += 1
+                            manuscritos_total += 1
+                            
+                            # También aumentar estos
+                            for aux in self._aumentar_imagen(img):
                                 all_images.append(aux)
                                 all_labels.append(char_folder)
+                                manuscritos_total += 1
+                
+                if char_count > 0:
+                    print(f"    ✓ {char_folder}: {char_count} imágenes propias")
+            
+            print(f"\n[📊] Total manuscritos propios:")
+            print(f"    - Base: {manuscritos_base}")
+            print(f"    - Con aumentación: {manuscritos_total}")
+        else:
+            print(f"\n[ℹ️] No hay manuscritos propios en: {manuscrito_dir}/")
+            print(f"    💡 Usa 'python agregar_manuscritos.py' para añadir tus datos")
+        
+        print("\n" + "="*70)
+        print(f"[✅] TOTAL FINAL: {len(all_images)} imágenes para entrenamiento")
+        print("="*70 + "\n")
+        
+        if len(all_images) == 0:
+            print("❌ Error: No hay imágenes. Revisa las carpetas.")
+            return np.array([]), np.array([])
         
         return np.array(all_images), np.array(all_labels)
